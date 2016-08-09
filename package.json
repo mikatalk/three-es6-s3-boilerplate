@@ -10,10 +10,6 @@
     "ports": {
       "server": 50000
     },
-    "targets": [
-      "dashboard",
-      "app"
-    ],
     "aws": {
       "buckets": [
         "ADD YOUR STAGING BUCKET NAME",
@@ -30,7 +26,7 @@
     }
   },
   "scripts": {
-    "build": "rimraf dist/dashboard && webpack --config webpack.config.prod.js --bail --progress --profile",
+    "build": "rimraf dist && webpack --config webpack.config.prod.js --bail --progress --profile",
     "dev": "webpack-dev-server --config webpack.config.dev.js --watch --colors --inline --progress",
     "bump": "node scripts/bump.js",
     "release": "npm run bump && npm run build && node scripts/release.js",
