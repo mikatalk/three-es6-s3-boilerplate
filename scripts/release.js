@@ -4,6 +4,7 @@ const
   fs = require( 'fs' ),
   path = require( 'path' ),
   s3 = require( 's3' ),
+  sh = require( 'shelljs' ),
   inquirer = require( 'inquirer' ),
   pkg = require( '../package.json' );
 
@@ -72,12 +73,25 @@ function promiseWrapUploader( uploader ) {
   });
 }
 
+function getDirectories(srcpath) {
+  return fs.readdirSync(srcpath).filter(function(file) {
+    return fs.statSync(path.join(srcpath, file)).isDirectory();
+  });
+}
+
 function syncDist() {
 
+  // let directories = getDirectories('./');
+  // for ( let directory of directories ) {
+  //   if ( directory.slice(0, 4) == 'Step' ) {
+  //     sh.exec( 'cp -R '+directory+' dist/'+directory );
+  //   }
+  // }
   promptForBucket()
     .then( function( answer ) {
       // return s3 client params
       return {
+        // localDir: 'release/',
         localDir: 'dist/',
         deleteRemoved: true,
         s3Params: {
@@ -89,7 +103,6 @@ function syncDist() {
       };
     })
     .then( function( uploadOptions ) {
-
       var s3Client = createS3Client();
 
       return promiseWrapUploader( s3Client.uploadDir( uploadOptions ));

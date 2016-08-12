@@ -11,13 +11,4 @@ Live Demo: https://mikatalk.github.io/three-es6-s3-boilerplate/
 ### Dev
 `npm run dev`
 
-### Release to S3
-Create a file `aws.private.json` containing you AWS credentials. For example:
-
-`{
-"accessKeyId": "ABCDEFGHIJKL",
-"secretAccessKey": "abcd12345efghjkl+yolo"
-}`
-
-Then run:
-`npm run release`
+In `Main.js` uncomment the step you want to run

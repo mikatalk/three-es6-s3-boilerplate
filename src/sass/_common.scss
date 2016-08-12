@@ -37,6 +37,19 @@ body {
     }
 }
 
+.arrow-anchor {
+    position: absolute;
+    bottom: 0;
+    color: white;
+    padding: 5px 10px;
+    text-decoration: none;
+    font-size: 22px;
+    position: fixed;
+    opacity: .6;
+    &.left { left: 0; }
+    &.right { right: 0; }
+}
+
 .clearfix {
     overflow: auto;
     zoom: 1;

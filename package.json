@@ -16,11 +16,10 @@
     ],
     "aws": {
       "buckets": [
-        "ADD YOUR STAGING BUCKET NAME",
-        "ADD YOUR PRODUCTION BUCKET NAME"
+        "webgl.michael-iriarte.com"
       ],
       "s3": {
-        "region": "us-west-2",
+        "region": "us-east-1",
         "sslEnabled": true,
         "apiVersion": "2016-05-01",
         "params": {
@@ -30,17 +29,18 @@
     }
   },
   "scripts": {
-    "build": "rimraf dist/dashboard && webpack --config webpack.config.prod.js --bail --progress --profile",
+    "clean": "rimraf tmp",
+    "build": "rimraf dist && webpack --config webpack.config.prod.js --bail --progress --profile",
     "dev": "webpack-dev-server --config webpack.config.dev.js --watch --colors --inline --progress",
-    "bump": "node scripts/bump.js",
-    "release": "npm run bump && npm run build && node scripts/release.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "release": "node ./scripts/release.js"
   },
   "dependencies": {
-    "three": "latest",
     "babel-plugin-transform-exponentiation-operator": "^6.8.0",
     "babel-plugin-transform-object-assign": "^6.8.0",
-    "babel-plugin-transform-runtime": "^6.8.0"
+    "babel-plugin-transform-runtime": "^6.8.0",
+    "randomcolor": "^0.4.4",
+    "three": "latest",
+    "three-orbit-controls": "https://github.com/mattdesl/three-orbit-controls"
   },
   "devDependencies": {
     "autoprefixer": "^6.3.6",

@@ -7,10 +7,13 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CombineLoaders = require( 'webpack-combine-loaders' );
 const extractSASS = new ExtractTextPlugin('css/bundle.css');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const glob = require('glob');
 
 module.exports = (options) => {
 
-  let targetPath = Path.resolve( __dirname, 'src' );
+  let sourcePath = Path.resolve( __dirname, 'src' );
+  // let threejsExamplesPath = Path.resolve( __dirname, './node_modules/three/examples/js' );
+  let vendorPath = Path.resolve( __dirname, 'src/libs' );
 
   let webpackConfig = {
     
@@ -22,6 +25,13 @@ module.exports = (options) => {
       './src/js/Main'
     ],
     
+    resolve: {
+      root: [
+        vendorPath,
+        sourcePath
+      ]
+    },
+
     output: {
       path: Path.join(__dirname, 'dist' ),
       filename: 'js/bundle.js'
@@ -55,7 +65,7 @@ module.exports = (options) => {
     module: {
       loaders: [{
         test: /\.js$/,
-        include: [ targetPath ],
+        include: [ vendorPath, sourcePath ],
         exclude: /(node_modules|bower_components)/,
         loader: CombineLoaders([
           {
@@ -75,32 +85,28 @@ module.exports = (options) => {
       // assets
       {
         test: /\.(png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$/,
-        include: [ targetPath ],
+        include: [ sourcePath ],
         loader: 'file-loader'
       },
-      // ng-template html
-      {
-        test: /\.tpl\.html$/,
-        include: [ targetPath ],
-        loader: CombineLoaders([
-          {
-            loader: 'ngtemplate-loader'
-          },
-          {
-            loader: 'html-loader',
-            query: {
-              attrs: false
-            }
-          }
-        ])
-      }]
+      ]
     }
 
   };
 
   if (options.isProduction) {
 
-    webpackConfig.entry = ['./src/js/Main'];
+    // let vendorDependencies = [];
+    let vendorDependencies = glob.sync('./libs/**/*.js');
+    vendorDependencies.push('three');
+
+    webpackConfig.entry = {
+      app: './src/js/Main',
+      vendor: vendorDependencies
+    };
+    webpackConfig.output = {
+      path: Path.join(__dirname, 'dist' ),
+      filename: 'js/[name].bundle.js'
+    }
 
   
     webpackConfig.plugins.push(
@@ -109,7 +115,8 @@ module.exports = (options) => {
         compressor: {
           warnings: false
         }
-      })
+      }),
+      new Webpack.optimize.CommonsChunkPlugin(/* chunkName= */'vendor', /* filename= */'js/vendor.bundle.js')
     );
 
     webpackConfig.module.loaders.push({
