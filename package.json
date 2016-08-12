@@ -10,10 +10,6 @@
     "ports": {
       "server": 50000
     },
-    "targets": [
-      "dashboard",
-      "app"
-    ],
     "aws": {
       "buckets": [
         "webgl.michael-iriarte.com"
