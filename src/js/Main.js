@@ -8,7 +8,7 @@ import '../sass/app.scss';
 import Step01 from './steps/01/Step01'; // Hello World
 import Step02 from './steps/02/Step02'; // Plane Contain vs Cover
 import Step03 from './steps/03/Step03'; // Custom Shader
-import Step04 from './steps/04/Step04'; // Full screen shader
+import Step04 from './steps/04/Step04'; // Full screen basic post processing
 import Step05 from './steps/05/Step05'; // Render Texture Material
 import Step06 from './steps/06/Step06'; // Phong Material
 import Step07 from './steps/07/Step07'; // Shadows
@@ -17,7 +17,7 @@ import Step09 from './steps/09/Step09'; // PostProcessing
 import Step10 from './steps/10/Step10'; // GPGPU
 import Step11 from './steps/11/Step11'; // test
 import Step12 from './steps/12/Step12'; // test
-// import Step13 from './steps/13/Step13'; // composer only
+import Step13 from './steps/13/Step13'; // lines
 
 const pages = [
     { hash:'#Step01', class: Step01 },
@@ -32,7 +32,7 @@ const pages = [
     { hash:'#Step10', class: Step10 },
     { hash:'#Step11', class: Step11 },
     { hash:'#Step12', class: Step12 },
-    // { hash:'#Step13', class: Step13 },
+    { hash:'#Step13', class: Step13 },
 ];
 
 let app = null;
