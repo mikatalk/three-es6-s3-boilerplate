@@ -149,7 +149,6 @@ console.log( 'Particles stars:', this.particleStarsOptions );
         this.effectBlend.uniforms[ 'tDiffuse2' ].value = this.effectSave.renderTarget.texture;
         this.effectBlend.uniforms[ 'mixRatio' ].value = this.options.blending;
 
-        this.effectCopyFront = new THREE.ShaderPass( THREE.CopyShader );
         this.effectCopy = new THREE.ShaderPass( THREE.CopyShader );
         this.effectCopy.renderToScreen = true;
 

@@ -1,5 +1,6 @@
 import THREE from 'three';
 
+const frameSize = { x:512, y:512 };
 
 export default class Step02 {
 
@@ -18,22 +19,40 @@ export default class Step02 {
         this.mesh = this.newMesh();
         this.scene.add( this.mesh );
 
+        window.addEventListener( 'resize', this.onWindowResize.bind(this), false );
+        this.onWindowResize();
+
         this.animate();
 
     }
 
+    onWindowResize() {
+
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+
+        this.renderer.setSize( window.innerWidth, window.innerHeight );
+
+        let scaleWidth = window.innerWidth/frameSize.x;
+        let scaleHeight = window.innerHeight/frameSize.y;
+
+        if ( scaleWidth < scaleHeight )
+            this.camera.position.z = frameSize.x / this.camera.aspect / (2 * Math.tan(this.camera.fov / 2 * (Math.PI / 180)));
+        else
+            this.camera.position.z = frameSize.y / (2 * Math.tan(this.camera.fov / 2 * (Math.PI / 180)));             
+
+    }
+        
     newMesh () {
-        let geometry = new THREE.SphereGeometry( 500, 16, 16 );
+        let geometry = new THREE.PlaneBufferGeometry( frameSize.x, frameSize.y );
         let material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
         return new THREE.Mesh( geometry, material );
     }
 
+
     animate() {
         
         requestAnimationFrame( this.animate.bind(this) );
-     
-        this.mesh.rotation.x += 0.01;
-        this.mesh.rotation.y += 0.02;
      
         this.renderer.render( this.scene, this.camera );
     }
