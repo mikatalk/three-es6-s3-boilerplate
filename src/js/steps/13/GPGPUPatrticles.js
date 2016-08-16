@@ -2,13 +2,15 @@ import THREE from 'three';
 import GPUComputationRenderer from 'utils/GPUComputationRenderer';
 
 
-const WIDTH = 64;
+const WIDTH = 512;
 const PARTICLES = WIDTH * WIDTH;
 
 
 const computeShaderPosition = `
 
-    uniform float delta;
+    precision mediump float;
+    
+    uniform float spacing;
     uniform float time;
     uniform float speed;
 
@@ -16,29 +18,22 @@ const computeShaderPosition = `
 
     void main() {
 
-        vec2 uv = gl_FragCoord.xy / resolution.xy;
-        vec2 pixel = 1.0 / resolution.xy;
+        vec4 pos = texture2D( texturePosition, gl_FragCoord.xy );
 
-        vec4 pos = texture2D( texturePosition, uv );
+        float index = gl_FragCoord.y*(${ WIDTH }.0) + gl_FragCoord.x;
 
+        float ratio =  index/${ WIDTH*WIDTH }.0;
 
-        float index = gl_FragCoord.x * ${ WIDTH }.0 + gl_FragCoord.y * ${ WIDTH * WIDTH }.0;
-        float radius = 3.0;
-index = index * .0001 + time * speed;
-        pos.x = cos( (index * speed ) * .09 ) * radius + sin( (index * speed ) * 6.0 ) * radius;
-        pos.y = sin( (index * speed ) * .06) * radius;
-        pos.z = cos( (index * speed ) * .062) * radius + cos( (index * speed ) * 6.0 ) * radius;
+        // float spacing = 1.;
+        float timeAt = (time/10.0 + ratio) * spacing;
+        
+        float radius = 100.0;
 
-        // pos.x = cos( (index * speed + time  ) * 5.9 ) * radius + sin( (index * speed + time ) * 6.0 ) * radius;
-        // pos.y = sin( (index * speed + time ) * .6) * radius;
-        // pos.z = cos( (index * speed + time ) * .62) * radius + cos( (index * speed + time ) * 6.0 ) * radius;
+        pos.x = sin( sin( timeAt * 81.0 + time*12.) * cos( timeAt * 90.0 ) ) * radius;
+        pos.y = sin( cos( timeAt * 60.0 ) * cos( timeAt * 70.0 )  ) * radius;
+        pos.z = sin( cos( timeAt * 70.0 ) + radius + sin( timeAt * 86.0 )) * radius;
 
-        // pos.x = sin( (index * speed  + time ) * .59 ) * radius;
-        // pos.y = sin( (index * speed  + time ) * .6 ) * radius;
-        // pos.z = sin( (index * speed  + time ) * .61 )* radius;
-
-
-        gl_FragColor = vec4( pos.xyz, 1.0 );
+        gl_FragColor = vec4( pos.xyz,ratio );
 
     }
 `;
@@ -56,20 +51,16 @@ const particleVertexShader = `
 
     void main() {
 
+        vec4 sample = texture2D( texturePosition, uv );
+        vec3 pos = sample.xyz;
 
-        vec4 posTemp = texture2D( texturePosition, uv );
-        vec3 pos = posTemp.xyz;
+        vColor = vec3( cos(sample.a*PI), cos(1.0-sample.a), cos(sample.a) );
 
-        // vColor = posTemp.xyz;
-        vColor = vec3( abs(sin(posTemp.x*100.0)),  abs(sin(posTemp.y*120.0)),  abs(sin(posTemp.z*70.0)));
-        // vColor = posTemp.aaa;// * 255.0;
-        // vColor = vec3( 1.0 );
+        vec4 mvPosition = modelViewMatrix * vec4( sample.xyz, 1.0 );
 
-        vec4 mvPosition = modelViewMatrix * vec4( pos, 1.0 );
-
-        gl_PointSize = .1 * cameraConstant / ( - mvPosition.z );
+        gl_PointSize = .2 * cameraConstant / ( - mvPosition.z );
         
-        if ( gl_PointSize < 4.0 ) gl_PointSize = 4.0;
+        if ( gl_PointSize < 2.0 ) gl_PointSize = 2.0;
 
         gl_Position = projectionMatrix * mvPosition;
 
@@ -84,9 +75,8 @@ const particleFragmentShader = `
 
     void main() {
 
-        // gl_FragColor = vec4( 1.0-sin( distance(vec2(.5,.5), gl_PointCoord.xy)*PI )/2.0 );
-        gl_FragColor = vec4( vColor.rgb, 1.0-sin( distance(vec2(.5,.5), gl_PointCoord.xy)*PI ) );
-        // gl_FragColor.rgb *= gl_FragColor.aaa;
+        gl_FragColor = vec4( vColor.rgb, 1.0 - distance(vec2(.5,.5), gl_PointCoord.xy)*2.0 );
+        
     }
 `;
 
@@ -130,7 +120,7 @@ export default class GPGPUPatrticles {
 
         this.positionVariable = this.gpuCompute.addVariable( "texturePosition", computeShaderPosition, this.dtPosition );
         this.positionUniforms = this.positionVariable.material.uniforms;
-        this.positionUniforms.delta = { type:'f', value: 0 }
+        this.positionUniforms.spacing = { type:'f', value: 0 }
         this.positionUniforms.time = { type:'f', value: 0 }
         this.positionUniforms.speed = { type:'f', value: 0 }
 
@@ -171,10 +161,8 @@ export default class GPGPUPatrticles {
         p = 0;
         for ( var j = 0; j < WIDTH; j++ ) {
             for ( var i = 0; i < WIDTH; i++ ) {
-
                 uvs[ p++ ] = i / ( WIDTH - 1 );
                 uvs[ p++ ] = j / ( WIDTH - 1 );
-
             }
         }
 
@@ -192,7 +180,16 @@ export default class GPGPUPatrticles {
             vertexShader:   particleVertexShader,
             fragmentShader: particleFragmentShader,
             transparent:    true,
-            // side: THREE.DoubleSide
+            alphaTest: .2,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+            // depthTest: false,
+            // blending: THREE.NoBlending,
+            // blending: THREE.NormalBlending,
+            // blending: THREE.SubtractiveBlending,
+            // blending: THREE.MultiplyBlending,
+            blending: THREE.AdditiveBlending,
+            shading: THREE.SmoothShading,
         } );
         material.extensions.drawBuffers = true;
 
@@ -219,13 +216,7 @@ export default class GPGPUPatrticles {
             posArray[ i + 0 ] = x;
             posArray[ i + 1 ] = y;
             posArray[ i + 2 ] = z;
-            posArray[ i + 3 ] = 0;//Math.random();
-
-            // posArray[ i + 0 ] = 0;
-            // posArray[ i + 1 ] = 0;
-            // posArray[ i + 2 ] = 0;
-            // posArray[ i + 3 ] = 0;
-
+            posArray[ i + 3 ] = 1;
         }
 
     }
@@ -242,18 +233,14 @@ export default class GPGPUPatrticles {
     
     }
 
-    update (delta, elapsedTime, speed) {
+    update (delta, elapsedTime, speed, spacing) {
 
         this.gpuCompute.compute();
 
-this.positionUniforms.delta.value = delta * speed;
-this.positionUniforms.time.value = elapsedTime * speed;
-this.positionUniforms.speed.value = speed;
+        this.positionUniforms.time.value = elapsedTime * speed;
+        this.positionUniforms.speed.value = speed;
+        this.positionUniforms.spacing.value = spacing;
 
-
-// this.positionUniforms.delta.value = 0.0;//delta * speed;
-// this.positionUniforms.time.value = 0.0;//elapsedTime * speed;
-// this.positionUniforms.speed.value = 0.0005;//speed;
         this.particleUniforms.texturePosition.value = this.gpuCompute.getCurrentRenderTarget( this.positionVariable ).texture;
 
     }
