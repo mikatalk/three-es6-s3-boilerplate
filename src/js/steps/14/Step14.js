@@ -21,30 +21,31 @@ import * as dat from 'libs/utils/dat.gui.min';
 
 import 'utils/GPUParticleSystem';
 
-export default class Step13 {
+export default class Step14 {
 
     constructor () {
 
 
         this.options = {
-            blending: .90,
-            brightness: 2.1,
-            speed: 2.2,
+            brightness: 1.3,
+            blending: .8,
+            speed: .01,
+            spacing: 3.3,
         }
 
         this.clock = new THREE.Clock;
 
-        this.stats = new Stats();
-        this.stats.domElement.style.position = 'absolute';
-        this.stats.domElement.style.top = '0px';
-        document.body.appendChild( this.stats.domElement );
+        // this.stats = new Stats();
+        // this.stats.domElement.style.position = 'absolute';
+        // this.stats.domElement.style.top = '0px';
+        // document.body.appendChild( this.stats.domElement );
 
         this.scene = new THREE.Scene();
         this.scene.fog = new THREE.Fog( 0x000000, 0, 160 );
 
         this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 100000 );
-        this.camera.position.z = 10;
-        this.camera.position.y = 2;
+        this.camera.position.z = 160;
+        this.camera.position.y = 10;
         this.camera.lookAt( new THREE.Vector3(0,0,0) );
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -61,8 +62,8 @@ export default class Step13 {
 
         this.controls = new (OrbitControls(THREE))( this.camera, this.renderer.domElement );
         this.controls.enableZoom = true;
-        this.controls.minDistance = 10;
-        this.controls.maxDistance = 160;
+        // this.controls.minDistance = 10;
+        // this.controls.maxDistance = 260;
 
         this.rttParams = {
             minFilter: THREE.LinearFilter,
@@ -100,7 +101,8 @@ export default class Step13 {
         this.gui.add(this.options, 'blending', 0, 1).step(0.01).onChange(function(){
             this.effectBlend.uniforms[ 'mixRatio' ].value = this.options.blending;
         }.bind(this));
-        this.gui.add(this.options, 'speed', 0, 10).step(0.01);
+        this.gui.add(this.options, 'speed', 0, .5).step(0.01);
+        this.gui.add(this.options, 'spacing', 0, 15).step(0.01);
 
         window.addEventListener( 'resize', this.onWindowResize.bind(this), false );
         this.onWindowResize();
@@ -124,20 +126,21 @@ export default class Step13 {
         
         requestAnimationFrame( this.animate.bind(this) );
 
-        this.stats.update();
+        // this.stats.update();
 
         let delta = this.clock.getDelta();
-
-        // this.scene.rotation.y += delta * this.options.speed;
-
+      
         this.horizon.update( this.clock.elapsedTime );
 
         this.particles.update( delta,
             this.clock.elapsedTime, 
-            this.options.speed );
+            this.options.speed,
+            this.options.spacing );
 
         this.composer.render( delta );
 
+        this.renderer.render( this.scene, this.camera );
     }
+
 
 };

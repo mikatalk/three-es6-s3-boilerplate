@@ -18,6 +18,7 @@ import Step10 from './steps/10/Step10'; // GPGPU
 import Step11 from './steps/11/Step11'; // test
 import Step12 from './steps/12/Step12'; // test
 import Step13 from './steps/13/Step13'; // lines
+import Step14 from './steps/14/Step14'; // lines
 
 const pages = [
     { hash:'#Step01', class: Step01 },
@@ -33,6 +34,7 @@ const pages = [
     { hash:'#Step11', class: Step11 },
     { hash:'#Step12', class: Step12 },
     { hash:'#Step13', class: Step13 },
+    { hash:'#Step14', class: Step14 },
 ];
 
 let app = null;
